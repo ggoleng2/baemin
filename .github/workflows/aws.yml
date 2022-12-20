@@ -1,0 +1,39 @@
+name: Push Image to ECR
+
+
+on:
+  push:
+    branches:
+      - master
+jobs:
+  push-image:
+    runs-on: 'ubuntu-20.04'
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: Declare Commit Hash variables
+        id: vars
+        shell: bash
+        run: |
+          echo "##[set-output name=branch_name;]$(echo ${GITHUB_REF#refs/heads/})"
+          echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+      - name: Build image
+        run: docker build -t themedium-ecr-django -f ./baemin/Dockerfile --no-cache .
+
+      - name: docker login
+        run: aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 003072849841.dkr.ecr.ap-northeast-2.amazonaws.com
+
+      - name: tag image
+        run: |
+          docker tag themedium-ecr-django:latest 003072849841.dkr.ecr.ap-northeast-2.amazonaws.com/${{ steps.vars.outputs.branch_name }}/themedium-ecr-django:latest
+          docker tag themedium-ecr-django:latest 003072849841.dkr.ecr.ap-northeast-2.amazonaws.com/${{ steps.vars.outputs.branch_name }}/themedium-ecr-django:${{ steps.vars.outputs.sha_short }}
+      - name: push image
+        run: docker push 003072849841.dkr.ecr.ap-northeast-2.amazonaws.com/${{ steps.vars.outputs.branch_name }} kstadium-batch-reward-calculator --all-tags
