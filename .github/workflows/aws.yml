@@ -26,7 +26,7 @@ jobs:
           echo "##[set-output name=branch_name;]$(echo ${GITHUB_REF#refs/heads/})"
           echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
       - name: Build image
-        run: docker build -t themedium-ecr-django -f ./baemin/Dockerfile --no-cache .
+        run: docker build -t themedium-ecr-django -f ./Dockerfile --no-cache .
 
       - name: docker login
         run: aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 003072849841.dkr.ecr.ap-northeast-2.amazonaws.com
