@@ -1,0 +1,4 @@
+{
+"name": "django",
+"ImageURI": "003072849841.dkr.ecr.ap-northeast-2.amazonaws.com/main/themedium-ecr-django:latest"
+}
